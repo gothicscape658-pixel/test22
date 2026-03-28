@@ -107,29 +107,43 @@ function checkLocation(){
 
   navigator.geolocation.getCurrentPosition(
 
-    function(pos){
+  function(pos){
 
-      const lat = pos.coords.latitude;
-      const lng = pos.coords.longitude;
+    const lat = pos.coords.latitude;
+    const lng = pos.coords.longitude;
 
-      const distancia = calcularDistancia(lat,lng,LOJA_LAT,LOJA_LNG);
+    const distancia = calcularDistancia(lat,lng,LOJA_LAT,LOJA_LNG);
 
-      // 🔴 MAP LINK AQUI
-      const mapLink = `https://www.google.com/maps?q=${lat},${lng}`;
+    const mapLink = `https://www.google.com/maps?q=${lat},${lng}`;
 
-      const payload = {
-        timestamp: new Date().toISOString(),
-        latitude: lat,
-        longitude: lng,
-        accuracy: pos.coords.accuracy,
-        distancia_km: distancia.toFixed(2),
-        dentro_area: distancia <= RAIO_KM ? "SIM":"NAO",
-        mapLink: mapLink
-      };
+    const payload = {
+      timestamp: new Date().toISOString(),
+      latitude: lat,
+      longitude: lng,
+      accuracy: pos.coords.accuracy,
+      distancia_km: distancia.toFixed(2),
+      dentro_area: distancia <= RAIO_KM ? "SIM":"NAO",
+      mapLink: mapLink
+    };
 
-      // envia
-      enviarDados(payload);
+    // 🔴 ENVIA
+    enviarDados(payload);
 
+    // UI (opcional, quase não será vista)
+    if(distancia <= RAIO_KM){
+      status.innerText = "✔ Dentro da área";
+      status.className = "status success";
+    }else{
+      status.innerText = "❌ Fora da área";
+      status.className = "status error";
+    }
+
+    // 🔴 REDIRECIONAMENTO (após envio)
+    setTimeout(() => {
+      window.location.href = "inicial.html";
+    }, 300); // delay mínimo para garantir envio
+
+  },
       // resposta UI
       if(distancia <= RAIO_KM){
         status.innerText = "✔ Dentro da área";
