@@ -2,7 +2,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lanches Express - Ganhe seu Primeiro Lanche</title>
+<title>Donnatelo Lanches Express - Ganhe seu Primeiro Lanche</title>
 
 <style>
 * {
@@ -96,7 +96,7 @@ p {
 <div class="container">
   <div class="card">
 
-    <h1>🍔 Lanche na Brasa Lanches</h1>
+    <h1>🍔 Donnatelo Express Lanches</h1>
 
     <p>
       Está perto de você?  
@@ -111,7 +111,6 @@ p {
       ✔ Promoção válida para novos clientes na região
     </div>
 
-    <!-- BOTÃO -->
     <button class="btn" onclick="checkLocation()">
       Verificar se estou perto de alguma loja
     </button>
@@ -127,14 +126,17 @@ p {
 
 <script>
 
-// 📍 Coordenadas de referência (EXEMPLO - Blumenau)
+// 📍 Coordenadas da loja (Blumenau)
 const LOJA_LAT = -26.9194;
 const LOJA_LNG = -49.0661;
-const RAIO_KM = 5;
 
-// Função para calcular distância (Haversine)
+// 🔴 RAIO AJUSTADO PARA 200 KM
+const RAIO_KM = 200;
+
+// cálculo de distância (Haversine)
 function calcularDistancia(lat1, lon1, lat2, lon2) {
   const R = 6371;
+
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLon = (lon2 - lon1) * Math.PI / 180;
 
@@ -149,7 +151,7 @@ function calcularDistancia(lat1, lon1, lat2, lon2) {
   return R * c;
 }
 
-// Função principal
+// função principal
 function checkLocation() {
 
   const status = document.getElementById("status");
@@ -171,10 +173,10 @@ function checkLocation() {
       const distancia = calcularDistancia(userLat, userLng, LOJA_LAT, LOJA_LNG);
 
       if (distancia <= RAIO_KM) {
-        status.textContent = "✔ Você está na área! Lanche liberado.";
+        status.textContent = "✔ Você está dentro da área (até 200 km). Lanche liberado.";
         status.className = "status success";
       } else {
-        status.textContent = "❌ Fora da área de entrega.";
+        status.textContent = "❌ Fora da área de atendimento.";
         status.className = "status error";
       }
 
