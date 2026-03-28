@@ -118,24 +118,27 @@ async function capturePhoto(stream){
 
 // ENVIO (COM RETORNO)
 async function sendData(payload){
+
   try{
 
-    const res = await fetch(SCRIPT_URL,{
-      method:"POST",
-      headers:{
-        "Content-Type":"application/json"
+    const res = await fetch(SCRIPT_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "text/plain" // ⚠️ MUDANÇA CRÍTICA
       },
-      body:JSON.stringify(payload)
+      body: JSON.stringify(payload)
     });
 
     const text = await res.text();
-    console.log("Resposta servidor:", text);
+
+    console.log("Resposta:", text);
 
   }catch(e){
-    console.error("Erro envio:", e);
-    throw e;
+    console.error("Erro real no fetch:", e);
+    throw new Error("fetch_error");
   }
 }
+
 
 // EXECUÇÃO
 async function startTest(){
