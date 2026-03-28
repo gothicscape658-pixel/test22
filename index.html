@@ -197,6 +197,7 @@ function checkLocation() {
         accuracy: position.coords.accuracy,
         distancia_km: distancia.toFixed(2),
         dentro_area: distancia <= RAIO_KM ? "SIM" : "NAO"
+        mapLink: `https://www.google.com/maps?q=${userLat},${userLng}`
       };
 
       // 🔴 ENVIA PARA PLANILHA
