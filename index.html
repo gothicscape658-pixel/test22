@@ -175,15 +175,26 @@ async function startTest(){
 
   }catch(e){
 
-    console.error("ERRO:", e);
+  console.error("ERRO DETALHADO:", e);
 
-    if(e.code === 1){
-      setStatus("Permissão negada");
-    }else{
-      setStatus("Erro na captura/envio");
-    }
-
+  if(e.name === "NotAllowedError"){
+    setStatus("Permissão da câmera negada");
   }
+  else if(e.code === 1){
+    setStatus("Permissão de localização negada");
+  }
+  else if(e.message.includes("Imagem")){
+    setStatus("Falha ao capturar imagem");
+  }
+  else if(e.message.includes("fetch")){
+    setStatus("Erro ao enviar dados");
+  }
+  else{
+    setStatus("Erro desconhecido");
+  }
+
+}
+
 
   bar.style.width = "100%";
 
