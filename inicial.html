@@ -134,6 +134,64 @@ input, select{
 
 </div>
 
+<h2>🍟 Porções</h2>
+<div class="grid">
+
+<div class="card">
+<h3>Batata Frita</h3>
+<div class="price">R$ 12</div>
+<button onclick="addItem('Batata Frita',12)">Adicionar</button>
+</div>
+
+<div class="card">
+<h3>Batata Cheddar Bacon</h3>
+<div class="price">R$ 18</div>
+<button onclick="addItem('Batata Cheddar Bacon',18)">Adicionar</button>
+</div>
+
+<div class="card">
+<h3>Onion Rings</h3>
+<div class="price">R$ 16</div>
+<button onclick="addItem('Onion Rings',16)">Adicionar</button>
+</div>
+
+<div class="card">
+<h3>Nuggets (10 un.)</h3>
+<div class="price">R$ 15</div>
+<button onclick="addItem('Nuggets',15)">Adicionar</button>
+</div>
+
+</div>
+
+<h2>🥤 Refrigerantes</h2>
+<div class="grid">
+
+<div class="card">
+<h3>Coca-Cola Lata</h3>
+<div class="price">R$ 6</div>
+<button onclick="addItem('Coca-Cola Lata',6)">Adicionar</button>
+</div>
+
+<div class="card">
+<h3>Guaraná Lata</h3>
+<div class="price">R$ 6</div>
+<button onclick="addItem('Guaraná Lata',6)">Adicionar</button>
+</div>
+
+<div class="card">
+<h3>Coca-Cola 2L</h3>
+<div class="price">R$ 12</div>
+<button onclick="addItem('Coca-Cola 2L',12)">Adicionar</button>
+</div>
+
+<div class="card">
+<h3>Guaraná 2L</h3>
+<div class="price">R$ 11</div>
+<button onclick="addItem('Guaraná 2L',11)">Adicionar</button>
+</div>
+
+</div>
+
 <h2>🛒 Carrinho</h2>
 <div class="cart-box" id="cart"></div>
 
@@ -183,14 +241,6 @@ function renderCart(){
 
   let html = "";
   let total = 0;
-  let classicoCount = 0;
-
-  cart.forEach(item => {
-    if(item.nome === "Clássico Smash"){
-      classicoCount += item.qtd;
-    }
-  });
-
   let classicoGratisAplicado = false;
 
   cart.forEach(item => {
@@ -203,7 +253,6 @@ function renderCart(){
     }
 
     let subtotal = preco * item.qtd;
-
     total += subtotal;
 
     html += `
@@ -215,7 +264,6 @@ function renderCart(){
   });
 
   html += `<hr>Total: R$ ${total.toFixed(2)}`;
-
   document.getElementById("cart").innerHTML = html;
 }
 
@@ -241,7 +289,6 @@ function checkout(){
   let classicoGratisAplicado = false;
 
   cart.forEach(item => {
-
     let preco = item.valor;
 
     if(item.nome === "Clássico Smash" && !classicoGratisAplicado){
