@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Donatello Lanches Express Delivery - Cardápio</title>
+<title>Donatello Lanches Express Delivery</title>
 
 <style>
 body{
@@ -17,13 +17,13 @@ body{
   background:#111827;
   padding:15px;
   text-align:center;
-  font-size:20px;
+  font-size:22px;
   font-weight:bold;
 }
 
 .container{
   padding:15px;
-  max-width:900px;
+  max-width:1000px;
   margin:auto;
 }
 
@@ -37,10 +37,6 @@ body{
   background:#1e293b;
   padding:15px;
   border-radius:12px;
-}
-
-.card h3{
-  margin:0 0 5px 0;
 }
 
 .price{
@@ -59,6 +55,27 @@ button{
   cursor:pointer;
 }
 
+.cart-box{
+  margin-top:20px;
+  background:#111827;
+  padding:15px;
+  border-radius:12px;
+}
+
+.cart-item{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:10px;
+}
+
+.remove-btn{
+  background:#ef4444;
+  padding:5px 10px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+}
+
 input, select{
   width:100%;
   padding:10px;
@@ -67,21 +84,10 @@ input, select{
   border:none;
 }
 
-.cart{
-  position:fixed;
-  bottom:0;
-  left:0;
-  right:0;
-  background:#111827;
-  padding:15px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-
-.total{
-  font-size:18px;
-  font-weight:bold;
+.checkout{
+  margin-top:15px;
+  width:100%;
+  background:#22c55e;
 }
 </style>
 
@@ -89,20 +95,20 @@ input, select{
 
 <body>
 
-<div class="header">🍔 Lanche na Brasa</div>
+<div class="header">🍔 Donatello Lanches</div>
 
 <div class="container">
 
-<h2>📍 Dados para entrega</h2>
+<h2>📍 Dados</h2>
 <div class="card">
-  <input type="text" id="endereco" placeholder="Digite seu endereço">
-  <input type="text" id="contato" placeholder="Telefone ou WhatsApp">
-  <select id="pagamento">
-    <option value="">Forma de pagamento</option>
-    <option>Dinheiro</option>
-    <option>Pix</option>
-    <option>Cartão</option>
-  </select>
+<input type="text" id="endereco" placeholder="Endereço">
+<input type="text" id="contato" placeholder="Contato">
+<select id="pagamento">
+<option value="">Pagamento</option>
+<option>Pix</option>
+<option>Cartão</option>
+<option>Dinheiro</option>
+</select>
 </div>
 
 <h2>🔥 Smash Burgers</h2>
@@ -110,115 +116,107 @@ input, select{
 
 <div class="card">
 <h3>Clássico Smash</h3>
-<p>Pão brioche, carne, cheddar</p>
-<div class="price">R$ 0</div>
-<button onclick="addItem(22)">Adicionar</button>
+<div class="price">1º GRÁTIS</div>
+<button onclick="addClassico()">Adicionar</button>
 </div>
 
 <div class="card">
 <h3>Smash Duplo</h3>
-<p>2 carnes, queijo, molho</p>
 <div class="price">R$ 28</div>
-<button onclick="addItem(28)">Adicionar</button>
+<button onclick="addItem('Smash Duplo',28)">Adicionar</button>
 </div>
 
 <div class="card">
 <h3>Smash Bacon</h3>
-<p>Bacon crocante + cheddar</p>
 <div class="price">R$ 30</div>
-<button onclick="addItem(30)">Adicionar</button>
+<button onclick="addItem('Smash Bacon',30)">Adicionar</button>
 </div>
 
 </div>
 
-<h2>🍔 Premium</h2>
-<div class="grid">
+<h2>🛒 Carrinho</h2>
+<div class="cart-box" id="cart"></div>
 
-<div class="card">
-<h3>Brasa Especial</h3>
-<div class="price">R$ 32</div>
-<button onclick="addItem(32)">Adicionar</button>
-</div>
+<button class="checkout" onclick="checkout()">Finalizar Pedido</button>
 
-<div class="card">
-<h3>Cheddar Explosion</h3>
-<div class="price">R$ 35</div>
-<button onclick="addItem(35)">Adicionar</button>
-</div>
-
-<div class="card">
-<h3>Gourmet BBQ</h3>
-<div class="price">R$ 36</div>
-<button onclick="addItem(36)">Adicionar</button>
-</div>
-
-</div>
-
-<h2>🍟 Acompanhamentos</h2>
-<div class="grid">
-
-<div class="card">
-<h3>Batata Frita</h3>
-<div class="price">R$ 12</div>
-<button onclick="addItem(12)">Adicionar</button>
-</div>
-
-<div class="card">
-<h3>Batata Cheddar Bacon</h3>
-<div class="price">R$ 18</div>
-<button onclick="addItem(18)">Adicionar</button>
-</div>
-
-</div>
-
-<h2>🥤 Bebidas</h2>
-<div class="grid">
-
-<div class="card">
-<h3>Refrigerante</h3>
-<div class="price">R$ 6</div>
-<button onclick="addItem(6)">Adicionar</button>
-</div>
-
-<div class="card">
-<h3>Suco</h3>
-<div class="price">R$ 8</div>
-<button onclick="addItem(8)">Adicionar</button>
-</div>
-
-</div>
-
-<h2>🎯 Combos</h2>
-<div class="grid">
-
-<div class="card">
-<h3>Combo Smash</h3>
-<div class="price">R$ 32</div>
-<button onclick="addItem(32)">Adicionar</button>
-</div>
-
-<div class="card">
-<h3>Combo Premium</h3>
-<div class="price">R$ 42</div>
-<button onclick="addItem(42)">Adicionar</button>
-</div>
-
-</div>
-
-</div>
-
-<div class="cart">
-<div class="total">Total: R$ <span id="total">0</span></div>
-<button onclick="checkout()">Finalizar Pedido</button>
 </div>
 
 <script>
 
-let total = 0;
+let cart = [];
 
-function addItem(valor){
-  total += valor;
-  document.getElementById("total").innerText = total.toFixed(2);
+function addItem(nome, valor){
+  let item = cart.find(i => i.nome === nome);
+  if(item){
+    item.qtd++;
+  } else {
+    cart.push({nome, valor, qtd:1});
+  }
+  renderCart();
+}
+
+function addClassico(){
+  let item = cart.find(i => i.nome === "Clássico Smash");
+
+  if(item){
+    item.qtd++;
+  } else {
+    cart.push({nome:"Clássico Smash", valor:22, qtd:1});
+  }
+
+  renderCart();
+}
+
+function removeItem(nome){
+  let item = cart.find(i => i.nome === nome);
+
+  if(item.qtd > 1){
+    item.qtd--;
+  } else {
+    cart = cart.filter(i => i.nome !== nome);
+  }
+
+  renderCart();
+}
+
+function renderCart(){
+
+  let html = "";
+  let total = 0;
+  let classicoCount = 0;
+
+  cart.forEach(item => {
+    if(item.nome === "Clássico Smash"){
+      classicoCount += item.qtd;
+    }
+  });
+
+  let classicoGratisAplicado = false;
+
+  cart.forEach(item => {
+
+    let preco = item.valor;
+
+    if(item.nome === "Clássico Smash" && !classicoGratisAplicado){
+      preco = 0;
+      classicoGratisAplicado = true;
+    }
+
+    let subtotal = preco * item.qtd;
+
+    total += subtotal;
+
+    html += `
+      <div class="cart-item">
+        ${item.nome} x${item.qtd} - R$ ${subtotal.toFixed(2)}
+        <button class="remove-btn" onclick="removeItem('${item.nome}')">-</button>
+      </div>
+    `;
+  });
+
+  html += `<hr>Total: R$ ${total.toFixed(2)}`;
+
+  document.getElementById("cart").innerHTML = html;
 }
 
 function checkout(){
@@ -227,29 +225,44 @@ function checkout(){
   let contato = document.getElementById("contato").value;
   let pagamento = document.getElementById("pagamento").value;
 
-  if(total === 0){
-    alert("Adicione itens ao pedido.");
+  if(cart.length === 0){
+    alert("Carrinho vazio");
     return;
   }
 
   if(endereco === "" || contato === "" || pagamento === ""){
-    alert("Preencha todos os dados.");
+    alert("Preencha os dados");
     return;
   }
 
-  let taxaEntrega = (Math.random() * 10 + 5).toFixed(2);
-  let totalFinal = (parseFloat(total) + parseFloat(taxaEntrega)).toFixed(2);
+  let taxa = (Math.random()*10+5).toFixed(2);
 
-  let mensagem = 
-  "📦 Pedido realizado!\n\n" +
-  "Endereço: " + endereco + "\n" +
-  "Contato: " + contato + "\n" +
-  "Pagamento: " + pagamento + "\n\n" +
-  "Subtotal: R$ " + total.toFixed(2) + "\n" +
-  "Taxa de entrega: R$ " + taxaEntrega + "\n" +
-  "Total final: R$ " + totalFinal;
+  let total = 0;
+  let classicoGratisAplicado = false;
 
-  alert(mensagem);
+  cart.forEach(item => {
+
+    let preco = item.valor;
+
+    if(item.nome === "Clássico Smash" && !classicoGratisAplicado){
+      preco = 0;
+      classicoGratisAplicado = true;
+    }
+
+    total += preco * item.qtd;
+  });
+
+  let totalFinal = (parseFloat(total)+parseFloat(taxa)).toFixed(2);
+
+  alert(
+    "Pedido realizado\n\n"+
+    "Endereço: "+endereco+"\n"+
+    "Contato: "+contato+"\n"+
+    "Pagamento: "+pagamento+"\n\n"+
+    "Subtotal: R$ "+total.toFixed(2)+"\n"+
+    "Entrega: R$ "+taxa+"\n"+
+    "Total: R$ "+totalFinal
+  );
 }
 
 </script>
